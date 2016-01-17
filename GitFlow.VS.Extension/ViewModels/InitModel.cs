@@ -12,6 +12,7 @@ namespace GitFlowVS.Extension.ViewModels
         private string featurePrefix;
         private string releasePrefix;
         private string hotfixPrefix;
+        private string supportPrefix;
         private string versionTagPrefix;
         private Visibility progressVisibility;
         private Visibility initGridVisibility;
@@ -37,6 +38,7 @@ namespace GitFlowVS.Extension.ViewModels
             FeaturePrefix = "feature/";
             ReleasePrefix = "release/";
             HotfixPrefix = "hotfix/";
+            SupportPrefix = "support/";
             VersionTagPrefix = "";
 
             InitGridVisibility = Visibility.Hidden;
@@ -95,6 +97,7 @@ namespace GitFlowVS.Extension.ViewModels
                         FeatureBranch = FeaturePrefix,
                         ReleaseBranch = ReleasePrefix,
                         HotfixBranch = HotfixPrefix,
+                        SupportBranch = HotfixPrefix,
                         VersionTag = VersionTagPrefix
                     });
                     if (!result.Success)
@@ -166,6 +169,17 @@ namespace GitFlowVS.Extension.ViewModels
             {
                 if (value == hotfixPrefix) return;
                 hotfixPrefix = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string SupportPrefix
+        {
+            get { return supportPrefix; }
+            set
+            {
+                if (value == supportPrefix) return;
+                supportPrefix = value;
                 OnPropertyChanged();
             }
         }
