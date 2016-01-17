@@ -112,6 +112,49 @@ namespace GitFlow.VS
             }
         }
 
+        public IEnumerable<BranchItem> AllSupportBranches
+        {
+            get
+            {
+                if (!IsInitialized)
+                    return Enumerable.Empty<BranchItem>();
+
+                using (var repo = new Repository(repoDirectory))
+                {
+                    var prefix = repo.Config.Get<string>("gitflow.prefix.support").Value;
+                    return
+                        repo.Branches.Where(b => (!b.IsRemote && b.Name.StartsWith(prefix)) /*|| (b.IsRemote && b.Name.Contains(prefix))*/)
+                            .Select(c => new BranchItem
+                            {
+                                Author = c.Tip.Author.Name,
+                                Name = c.IsRemote ? c.Name : c.Name.Replace(prefix, ""),
+                                LastCommit = c.Tip.Author.When,
+                                IsTracking = c.IsTracking,
+                                IsCurrentBranch = c.IsCurrentRepositoryHead,
+                                IsRemote = c.IsRemote,
+                                CommitId = c.Tip.Id.ToString(),
+                                Message = c.Tip.MessageShort
+                            }).ToList();
+                }
+
+            }
+        }
+
+        public IEnumerable<string> AllTags
+        {
+            get
+            {
+                if (!IsInitialized)
+                    return Enumerable.Empty<string>();
+
+                using (var repo = new Repository(repoDirectory))
+                {
+                    return repo.Tags.Select(s => s.Name).ToList();
+                }   
+
+            }
+        }
+
         public IEnumerable<BranchItem> AllFeatureBranches
         {
             get
@@ -127,7 +170,7 @@ namespace GitFlow.VS
                             .Select(c => new BranchItem
                             {
                                 Author = c.Tip.Author.Name,
-                                Name = c.IsRemote ? c.Name :  c.Name.Replace(prefix,""),
+                                Name = c.IsRemote ? c.Name : c.Name.Replace(prefix, ""),
                                 LastCommit = c.Tip.Author.When,
                                 IsTracking = c.IsTracking,
                                 IsCurrentBranch = c.IsCurrentRepositoryHead,
@@ -135,7 +178,7 @@ namespace GitFlow.VS
                                 CommitId = c.Tip.Id.ToString(),
                                 Message = c.Tip.MessageShort
                             }).ToList();
-                }   
+                }
 
             }
         }
@@ -281,6 +324,12 @@ namespace GitFlow.VS
         public GitFlowWrapper(string repoDirectory)
         {
             this.repoDirectory = repoDirectory;
+        }
+
+        public GitFlowCommandResult StartSupport(string supportName, string releaseTag)
+        {
+            string gitArguments = "support start \"" + TrimBranchName(supportName) + "\"" + "\"" + TrimBranchName(releaseTag) + "\"";
+            return RunGitFlow(gitArguments);
         }
 
         public GitFlowCommandResult StartFeature(string featureName)
